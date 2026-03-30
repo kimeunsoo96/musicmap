@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/musicmap/.omc/autopilot/requirements.md:*)",
+      "Bash(python3 -c:*)",
+      "Bash(printf '%s\\\\n' 'import os' 'os.makedirs\\(\"\"/c/musicmap/.omc/autopilot\"\", exist_ok=True\\)' 'path = \"\"/c/musicmap/.omc/autopilot/requirements.md\"\"')",
+      "Bash(python3 /c/musicmap/.omc/autopilot/writer.py)",
+      "Bash(node:*)",
+      "WebFetch(domain:chatgpt.com)",
+      "Bash(curl -s -L -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" https://chatgpt.com/share/69bcb41f-c168-8000-bb50-0e664c7145c5)",
+      "Bash(grep -oE '[가-힣][^,]{30,}' /tmp/chatgpt_page.html)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p \"C:/musicmap/src/app/api/places/[id]/save\")",
+      "Bash(mkdir -p \"C:/musicmap/src/app/api/pins/[id]/like\")",
+      "Bash(npm run:*)",
+      "Bash(npm audit:*)",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics_directory",
+      "mcp__plugin_oh-my-claudecode_t__ast_grep_search",
+      "mcp__plugin_oh-my-claudecode_t__state_list_active",
+      "mcp__plugin_oh-my-claudecode_t__state_clear",
+      "Bash(curl -s -X POST \"https://accounts.spotify.com/api/token\" -H \"Content-Type: application/x-www-form-urlencoded\" -d \"grant_type=client_credentials&client_id=871c555ed3404bddacdc385c0f88601a&client_secret=b87a2f7b0ca34efa95f49b9428afb239\")",
+      "Bash(TOKEN=\"BQAo9-03dJeZLyCNUwpRycZDltdLWwzRZ_RDdMxPTcrNK562xhjXjYFvXKJ3DVGv0xF-kDSkj_IBnqT6g4R8p1d9AAYhYIAn-DvBJ6PWd2ShNtfSZ-_fG_n4EwY7u5R1mz30L4ceSXk\")",
+      "Bash(curl -s \"https://api.spotify.com/v1/search?q=sunset+lover&type=track&limit=3\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(curl -s \"https://api.deezer.com/search?q=sunset+lover&limit=3\")"
+    ]
+  }
+}

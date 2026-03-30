@@ -1,0 +1,153 @@
+'use client';
+
+import React, { useState } from 'react';
+import { X, Bookmark, MapPin, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useMapContext } from '@/contexts/map-context';
+import { useAuth } from '@/contexts/auth-context';
+import { getMockPlaceDetail, toggleMockSave, isMockSaved } from '@/lib/mock-data';
+import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+import PinCard from './PinCard';
+import type { Pin } from '@/types';
+
+const AddPinModalLazy = dynamic(() => import('./AddPinModal'), { ssr: false });
+
+interface AddPinButtonProps {
+  placeId: string;
+  placeName: string;
+}
+
+function AddPinButton({ placeId, placeName }: AddPinButtonProps) {
+  const { isAuthenticated } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  if (!isAuthenticated) {
+    return (
+      <Link
+        href="/login"
+        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-spotify hover:bg-spotify-dark text-black font-semibold text-sm transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        Add a Song
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setModalOpen(true)}
+        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-spotify hover:bg-spotify-dark text-black font-semibold text-sm transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        Add a Song
+      </button>
+      {modalOpen && (
+        <AddPinModalLazy
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          placeId={placeId}
+          placeName={placeName}
+        />
+      )}
+    </>
+  );
+}
+
+export default function PlacePanel() {
+  const { selectedPlace, isPanelOpen, closePanel } = useMapContext();
+  const [saved, setSaved] = useState(() =>
+    selectedPlace ? isMockSaved(selectedPlace.id) : false,
+  );
+
+  // Derive saved state when selected place changes
+  React.useEffect(() => {
+    if (selectedPlace) {
+      setSaved(isMockSaved(selectedPlace.id));
+    }
+  }, [selectedPlace?.id]);
+
+  const detail = selectedPlace ? getMockPlaceDetail(selectedPlace.id) : null;
+  const pins: Pin[] = detail
+    ? [...detail.pins].sort((a, b) => b.likes_count - a.likes_count)
+    : [];
+
+  function handleSave() {
+    if (!selectedPlace) return;
+    const result = toggleMockSave(selectedPlace.id);
+    setSaved(result.saved);
+  }
+
+  const isOpen = isPanelOpen && selectedPlace !== null;
+
+  return (
+    <div
+      className={cn(
+        'fixed right-0 top-[60px] w-[380px] h-[calc(100vh-60px)] z-[9999]',
+        'bg-surface-light border-l border-accent/20',
+        'flex flex-col',
+        'transition-transform duration-300 ease-in-out',
+        isOpen ? 'translate-x-0' : 'translate-x-full',
+      )}
+    >
+      {selectedPlace && (
+        <>
+          {/* Header */}
+          <div className="shrink-0 px-4 pt-4 pb-3 border-b border-white/5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-bold text-slate-100 truncate">{selectedPlace.name}</h2>
+                <p className="text-sm text-slate-400 flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {selectedPlace.city}, {selectedPlace.country}
+                </p>
+              </div>
+              <button
+                onClick={closePanel}
+                className="shrink-0 p-1.5 rounded-full text-slate-400 hover:text-slate-200 hover:bg-surface-hover transition-colors"
+                aria-label="Close panel"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 mt-3">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-spotify/10 text-spotify text-xs font-semibold">
+                {selectedPlace.pin_count} {selectedPlace.pin_count === 1 ? 'pin' : 'pins'}
+              </span>
+              <button
+                onClick={handleSave}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
+                  saved
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-surface-hover text-slate-400 hover:text-slate-200',
+                )}
+              >
+                <Bookmark className={cn('w-3.5 h-3.5', saved && 'fill-current')} />
+                {saved ? 'Saved' : 'Save Place'}
+              </button>
+            </div>
+          </div>
+
+          {/* Pin list */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+            {pins.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-8">
+                No pins yet. Be the first to add a song!
+              </p>
+            ) : (
+              pins.map((pin) => <PinCard key={pin.id} pin={pin} />)
+            )}
+          </div>
+
+          {/* Sticky footer */}
+          <div className="shrink-0 px-4 py-3 border-t border-white/5">
+            <AddPinButton placeId={selectedPlace.id} placeName={selectedPlace.name} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
