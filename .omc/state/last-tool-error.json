@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd C:/musicmap && git commit -m \\\"$(cat <<'EOF'\\nInitial MusicMap MVP - travel + music map where travelers pin songs to places\\n\\n- Next.js 14 + TypeScript + Tailwind CSS dark theme\\n- Lea...",
-  "error": "Exit code 128\nAuthor identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: unable to auto-detect email address (got 'user@DESKTOP-C710JV0.(none)')",
-  "timestamp": "2026-03-30T21:03:03.076Z",
-  "retry_count": 1
-}

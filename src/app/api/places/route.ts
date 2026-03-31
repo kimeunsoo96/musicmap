@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMockPlaces } from '@/lib/mock-data';
+import { getPlaces } from '@/lib/db';
 import type { MapBounds } from '@/types';
 
 export async function GET(request: NextRequest) {
@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
     }
 
     const bounds: MapBounds = { north, south, east, west };
-    const places = getMockPlaces(bounds);
+    const places = await getPlaces(bounds);
     return NextResponse.json(places);
   }
 
-  const places = getMockPlaces();
+  const places = await getPlaces();
   return NextResponse.json(places);
 }

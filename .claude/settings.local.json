@@ -22,7 +22,9 @@
       "Bash(curl -s -X POST \"https://accounts.spotify.com/api/token\" -H \"Content-Type: application/x-www-form-urlencoded\" -d \"grant_type=client_credentials&client_id=871c555ed3404bddacdc385c0f88601a&client_secret=b87a2f7b0ca34efa95f49b9428afb239\")",
       "Bash(TOKEN=\"BQAo9-03dJeZLyCNUwpRycZDltdLWwzRZ_RDdMxPTcrNK562xhjXjYFvXKJ3DVGv0xF-kDSkj_IBnqT6g4R8p1d9AAYhYIAn-DvBJ6PWd2ShNtfSZ-_fG_n4EwY7u5R1mz30L4ceSXk\")",
       "Bash(curl -s \"https://api.spotify.com/v1/search?q=sunset+lover&type=track&limit=3\" -H \"Authorization: Bearer $TOKEN\")",
-      "Bash(curl -s \"https://api.deezer.com/search?q=sunset+lover&limit=3\")"
+      "Bash(curl -s \"https://api.deezer.com/search?q=sunset+lover&limit=3\")",
+      "Bash(curl -s \"https://syevltuyzjcwvdvkksmr.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZXZsdHV5empjd3Zkdmtrc21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzAyMTksImV4cCI6MjA5MDUwNjIxOX0.gFgjjZeFTiXd1DTHxdk685RWteEOzu5k8LB-xGh75bI\")",
+      "Bash(curl:*)"
     ]
   }
 }

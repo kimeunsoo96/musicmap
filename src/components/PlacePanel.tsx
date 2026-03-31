@@ -1,24 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Bookmark, MapPin, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useMapContext } from '@/contexts/map-context';
 import { useAuth } from '@/contexts/auth-context';
-import { getMockPlaceDetail, toggleMockSave, isMockSaved } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import PinCard from './PinCard';
-import type { Pin } from '@/types';
+import type { Pin, PlaceDetail } from '@/types';
 
 const AddPinModalLazy = dynamic(() => import('./AddPinModal'), { ssr: false });
 
 interface AddPinButtonProps {
   placeId: string;
   placeName: string;
+  onPinAdded: () => void;
 }
 
-function AddPinButton({ placeId, placeName }: AddPinButtonProps) {
+function AddPinButton({ placeId, placeName, onPinAdded }: AddPinButtonProps) {
   const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -46,7 +46,10 @@ function AddPinButton({ placeId, placeName }: AddPinButtonProps) {
       {modalOpen && (
         <AddPinModalLazy
           isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+            onPinAdded();
+          }}
           placeId={placeId}
           placeName={placeName}
         />
@@ -57,26 +60,52 @@ function AddPinButton({ placeId, placeName }: AddPinButtonProps) {
 
 export default function PlacePanel() {
   const { selectedPlace, isPanelOpen, closePanel } = useMapContext();
-  const [saved, setSaved] = useState(() =>
-    selectedPlace ? isMockSaved(selectedPlace.id) : false,
-  );
+  const [detail, setDetail] = useState<PlaceDetail | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
-  React.useEffect(() => {
-    if (selectedPlace) {
-      setSaved(isMockSaved(selectedPlace.id));
+  // Load place detail whenever selectedPlace changes
+  useEffect(() => {
+    if (!selectedPlace) {
+      setDetail(null);
+      setSaved(false);
+      return;
     }
+
+    setLoadingDetail(true);
+    fetch(`/api/places/${selectedPlace.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: PlaceDetail | null) => {
+        setDetail(data);
+      })
+      .catch(() => setDetail(null))
+      .finally(() => setLoadingDetail(false));
   }, [selectedPlace?.id]);
 
-  const detail = selectedPlace ? getMockPlaceDetail(selectedPlace.id) : null;
+  function refreshDetail() {
+    if (!selectedPlace) return;
+    fetch(`/api/places/${selectedPlace.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: PlaceDetail | null) => setDetail(data))
+      .catch(() => {});
+  }
+
+  async function handleSave() {
+    if (!selectedPlace) return;
+    try {
+      const res = await fetch(`/api/places/${selectedPlace.id}/save`, { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        setSaved(result.saved);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   const pins: Pin[] = detail
     ? [...detail.pins].sort((a, b) => b.likes_count - a.likes_count)
     : [];
-
-  function handleSave() {
-    if (!selectedPlace) return;
-    const result = toggleMockSave(selectedPlace.id);
-    setSaved(result.saved);
-  }
 
   const isOpen = isPanelOpen && selectedPlace !== null;
 
@@ -126,7 +155,7 @@ export default function PlacePanel() {
 
             <div className="flex items-center gap-3 mt-3">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-spotify/10 text-spotify text-xs font-semibold">
-                {selectedPlace.pin_count} {selectedPlace.pin_count === 1 ? 'pin' : 'pins'}
+                {detail?.pin_count ?? selectedPlace.pin_count} {(detail?.pin_count ?? selectedPlace.pin_count) === 1 ? 'pin' : 'pins'}
               </span>
               <button
                 onClick={handleSave}
@@ -145,7 +174,9 @@ export default function PlacePanel() {
 
           {/* Pin list */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-            {pins.length === 0 ? (
+            {loadingDetail ? (
+              <p className="text-sm text-slate-500 text-center py-8">Loading...</p>
+            ) : pins.length === 0 ? (
               <p className="text-sm text-slate-500 text-center py-8">
                 No pins yet. Be the first to add a song!
               </p>
@@ -156,7 +187,11 @@ export default function PlacePanel() {
 
           {/* Sticky footer */}
           <div className="shrink-0 px-4 py-3 border-t border-white/5 bottom-sheet-footer">
-            <AddPinButton placeId={selectedPlace.id} placeName={selectedPlace.name} />
+            <AddPinButton
+              placeId={selectedPlace.id}
+              placeName={selectedPlace.name}
+              onPinAdded={refreshDetail}
+            />
           </div>
         </>
       )}

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MOCK_PLACES } from '@/lib/mock-data';
-import type { Place } from '@/types';
+import { createOrGetPlace } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -29,28 +28,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid lng' }, { status: 400 });
   }
 
-  const existing = MOCK_PLACES.find(
-    (p) => p.name.toLowerCase() === name.toLowerCase(),
-  );
-
-  if (existing) {
-    return NextResponse.json(existing);
+  try {
+    const place = await createOrGetPlace({
+      name: name.trim(),
+      lat,
+      lng,
+      city: city ?? '',
+      country: country ?? '',
+      google_place_id: google_place_id ?? '',
+    });
+    return NextResponse.json(place);
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to create place' }, { status: 500 });
   }
-
-  const newPlace: Place = {
-    id: `place-${Date.now()}`,
-    google_place_id: google_place_id ?? '',
-    name,
-    lat,
-    lng,
-    city: city ?? '',
-    country: country ?? '',
-    cover_image: null,
-    pin_count: 0,
-    created_at: new Date().toISOString(),
-  };
-
-  MOCK_PLACES.push(newPlace);
-
-  return NextResponse.json(newPlace);
 }

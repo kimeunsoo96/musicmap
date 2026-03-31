@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Heart, Music } from 'lucide-react';
-import { toggleMockLike, isMockLiked } from '@/lib/mock-data';
 import { cn, timeAgo } from '@/lib/utils';
 import type { Pin } from '@/types';
 import AudioPreview from './AudioPreview';
@@ -12,13 +11,20 @@ interface PinCardProps {
 }
 
 export default function PinCard({ pin }: PinCardProps) {
-  const [liked, setLiked] = useState(() => isMockLiked(pin.id));
+  const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(pin.likes_count);
 
-  function handleLike() {
-    const result = toggleMockLike(pin.id);
-    setLiked(result.liked);
-    setLikesCount(result.likes_count);
+  async function handleLike() {
+    try {
+      const res = await fetch(`/api/pins/${pin.id}/like`, { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        setLiked(result.liked);
+        setLikesCount(result.likes_count);
+      }
+    } catch {
+      // ignore network errors
+    }
   }
 
   const track = pin.track;

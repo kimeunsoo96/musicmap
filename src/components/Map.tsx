@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getMockPlaces } from '@/lib/mock-data';
 import { useMapContext } from '@/contexts/map-context';
 import type { Place } from '@/types';
 
@@ -39,12 +38,12 @@ function FlyToHandler() {
 }
 
 // ----------------------------------------------------------------
-// MapEvents - listens for moveend (no-op for mock, structure present)
+// MapEvents - listens for moveend
 // ----------------------------------------------------------------
 function MapEvents() {
   useMapEvents({
     moveend: () => {
-      // No-op for mock mode; in production: capture bounds and fetch places
+      // bounds-based fetching can be wired here in future
     },
   });
   return null;
@@ -58,13 +57,16 @@ export default function Map() {
   const [places, setPlaces] = useState<Place[]>([]);
 
   useEffect(() => {
-    setPlaces(getMockPlaces());
+    fetch('/api/places')
+      .then((res) => res.json())
+      .then((data: Place[]) => setPlaces(Array.isArray(data) ? data : []))
+      .catch(() => setPlaces([]));
   }, []);
 
-  // Add searched places that aren't in mock data
+  // Add searched places that aren't already in the list
   useEffect(() => {
-    if (selectedPlace && !places.find(p => p.id === selectedPlace.id)) {
-      setPlaces(prev => [...prev, selectedPlace]);
+    if (selectedPlace && !places.find((p) => p.id === selectedPlace.id)) {
+      setPlaces((prev) => [...prev, selectedPlace]);
     }
   }, [selectedPlace]); // eslint-disable-line react-hooks/exhaustive-deps
 

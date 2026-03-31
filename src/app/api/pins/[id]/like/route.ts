@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { toggleMockLike } from '@/lib/mock-data';
+import { toggleLike } from '@/lib/db';
 
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const result = toggleMockLike(id);
+  const result = await toggleLike(id);
   return NextResponse.json(result);
 }

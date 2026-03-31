@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMockPlaceDetail } from '@/lib/mock-data';
+import { getPlaceDetail } from '@/lib/db';
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const place = getMockPlaceDetail(id);
+  const place = await getPlaceDetail(id);
 
   if (!place) {
     return NextResponse.json({ error: 'Place not found' }, { status: 404 });

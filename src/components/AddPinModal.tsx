@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Search, Music } from 'lucide-react';
-import { addMockPin } from '@/lib/mock-data';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
 import type { Track } from '@/types';
@@ -72,8 +71,16 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
     if (!selectedTrack || !user) return;
     setSubmitting(true);
     try {
-      addMockPin(placeId, selectedTrack.id, user.id, caption.trim());
-      onClose();
+      const res = await fetch('/api/pins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placeId, track: selectedTrack, caption: caption.trim() }),
+      });
+      if (res.ok) {
+        onClose();
+      }
+    } catch {
+      // ignore network errors
     } finally {
       setSubmitting(false);
     }
