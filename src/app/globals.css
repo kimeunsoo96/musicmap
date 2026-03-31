@@ -2,16 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background-color: #0f1117;
   color: #e2e8f0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+::selection {
+  background-color: rgba(29, 185, 84, 0.25);
+  color: #e2e8f0;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -51,4 +60,21 @@ body {
 
 .leaflet-control-zoom a:hover {
   background: #252833 !important;
+}
+
+/* Mobile bottom sheet drag handle */
+.drag-handle {
+  width: 36px;
+  height: 4px;
+  background: #363a4a;
+  border-radius: 2px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Bottom sheet safe area on iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-sheet-footer {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
 }

@@ -8,7 +8,7 @@ import PlacePanel from '@/components/PlacePanel';
 export default function HomePage() {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <Header>
+      <Header hasSearch>
         <SearchBar />
       </Header>
       <main className="flex-1 relative">

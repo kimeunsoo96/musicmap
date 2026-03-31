@@ -28,7 +28,6 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setStep(1);
@@ -39,7 +38,6 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
     }
   }, [isOpen]);
 
-  // Debounced track search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -91,18 +89,27 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm"
     >
       <div
         className={cn(
-          'w-full max-w-lg bg-surface-light rounded-xl shadow-2xl border border-white/10',
-          'flex flex-col max-h-[90vh]',
+          'w-full bg-surface-light border border-white/10 shadow-2xl',
+          'flex flex-col',
           'transition-all duration-200',
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
+          // Mobile: full-screen sheet from bottom
+          'rounded-t-2xl max-h-[92vh]',
+          // Desktop: centered modal
+          'md:max-w-lg md:rounded-xl md:max-h-[90vh]',
         )}
       >
+        {/* Mobile drag handle */}
+        <div className="md:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+          <div className="drag-handle" />
+        </div>
+
         {/* Modal header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between px-5 pt-4 pb-4 border-b border-white/5 shrink-0 md:pt-5">
           <h2 className="text-base font-semibold text-slate-100">
             {step === 1 ? `Add a song to ${placeName}` : 'Add a caption'}
           </h2>
@@ -207,7 +214,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2 pt-1 pb-safe">
               <button
                 onClick={handleBack}
                 className="flex-1 py-2.5 rounded-lg text-sm font-medium text-slate-400 bg-surface hover:bg-surface-hover border border-white/10 transition-colors"

@@ -61,7 +61,6 @@ export default function PlacePanel() {
     selectedPlace ? isMockSaved(selectedPlace.id) : false,
   );
 
-  // Derive saved state when selected place changes
   React.useEffect(() => {
     if (selectedPlace) {
       setSaved(isMockSaved(selectedPlace.id));
@@ -84,17 +83,30 @@ export default function PlacePanel() {
   return (
     <div
       className={cn(
-        'fixed right-0 top-[60px] w-[380px] h-[calc(100vh-60px)] z-[9999]',
-        'bg-surface-light border-l border-accent/20',
+        'fixed z-[9999]',
+        'bg-surface-light border-accent/20',
         'flex flex-col',
         'transition-transform duration-300 ease-in-out',
-        isOpen ? 'translate-x-0' : 'translate-x-full',
+        // Mobile: bottom sheet
+        'bottom-0 left-0 right-0 h-[70vh] rounded-t-2xl border-t border-l-0 border-r-0',
+        !isOpen && 'translate-y-full',
+        isOpen && 'translate-y-0',
+        // Desktop: right panel
+        'md:bottom-auto md:left-auto md:right-0 md:top-[60px] md:w-[380px] md:h-[calc(100vh-60px)] md:overflow-hidden',
+        'md:rounded-none md:border-l md:border-t-0',
+        !isOpen && 'md:translate-y-0 md:translate-x-full',
+        isOpen && 'md:translate-x-0',
       )}
     >
+      {/* Mobile drag handle */}
+      <div className="md:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div className="drag-handle" />
+      </div>
+
       {selectedPlace && (
         <>
           {/* Header */}
-          <div className="shrink-0 px-4 pt-4 pb-3 border-b border-white/5">
+          <div className="shrink-0 px-4 pt-3 pb-3 border-b border-white/5 md:pt-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-bold text-slate-100 truncate">{selectedPlace.name}</h2>
@@ -143,7 +155,7 @@ export default function PlacePanel() {
           </div>
 
           {/* Sticky footer */}
-          <div className="shrink-0 px-4 py-3 border-t border-white/5">
+          <div className="shrink-0 px-4 py-3 border-t border-white/5 bottom-sheet-footer">
             <AddPinButton placeId={selectedPlace.id} placeName={selectedPlace.name} />
           </div>
         </>

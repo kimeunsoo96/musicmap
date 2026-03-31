@@ -25,14 +25,14 @@ export default function PinCard({ pin }: PinCardProps) {
   const user = pin.user;
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-surface hover:bg-surface-hover transition-colors">
+    <div className="group flex items-start gap-3 p-3 rounded-lg bg-surface hover:bg-surface-hover transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-black/30">
       {/* Album art */}
-      <div className="shrink-0 w-12 h-12 rounded overflow-hidden bg-surface-hover flex items-center justify-center">
+      <div className="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded overflow-hidden bg-surface-hover flex items-center justify-center">
         {track?.album_art_url ? (
           <img
             src={track.album_art_url}
             alt={track.album}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <Music className="w-5 h-5 text-slate-500" />
@@ -65,10 +65,10 @@ export default function PinCard({ pin }: PinCardProps) {
         <button
           onClick={handleLike}
           className={cn(
-            'p-1.5 rounded-full transition-colors',
+            'p-1.5 rounded-full transition-all duration-150',
             liked
-              ? 'text-red-500 hover:text-red-400'
-              : 'text-slate-500 hover:text-slate-300',
+              ? 'text-red-500 hover:text-red-400 scale-110'
+              : 'text-slate-500 hover:text-slate-300 hover:scale-110',
           )}
           aria-label={liked ? 'Unlike' : 'Like'}
         >

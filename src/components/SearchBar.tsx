@@ -50,7 +50,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full md:max-w-md">
       <div className="relative flex items-center">
         <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
         <input

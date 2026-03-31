@@ -53,51 +53,51 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
         {/* User header */}
         <div className="flex items-center gap-4 mb-8">
           {user.avatar_url ? (
             <img
               src={user.avatar_url}
               alt={user.display_name}
-              className="w-16 h-16 rounded-full object-cover ring-2 ring-[#1db954]/30"
+              className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover ring-2 ring-[#1db954]/30 shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-[#252833] flex items-center justify-center ring-2 ring-white/10">
-              <User className="w-8 h-8 text-slate-400" />
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#252833] flex items-center justify-center ring-2 ring-white/10 shrink-0">
+              <User className="w-7 h-7 md:w-8 md:h-8 text-slate-400" />
             </div>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100">{user.display_name}</h1>
-            <p className="text-sm text-slate-400">{user.email}</p>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold text-slate-100 truncate">{user.display_name}</h1>
+            <p className="text-sm text-slate-400 truncate">{user.email}</p>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-6 border-b border-white/5 mb-6">
+        {/* Tabs — scrollable on very small screens */}
+        <div className="flex gap-0 border-b border-white/5 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('pins')}
             className={cn(
-              'pb-3 text-sm font-medium transition-colors border-b-2 -mb-px',
+              'pb-3 px-1 mr-6 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0',
               activeTab === 'pins'
                 ? 'text-[#1db954] border-[#1db954]'
                 : 'text-slate-400 border-transparent hover:text-slate-200',
             )}
           >
             My Pins
-            <span className="ml-2 text-xs text-slate-500">({userPins.length})</span>
+            <span className="ml-1.5 text-xs text-slate-500">({userPins.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('saved')}
             className={cn(
-              'pb-3 text-sm font-medium transition-colors border-b-2 -mb-px',
+              'pb-3 px-1 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0',
               activeTab === 'saved'
                 ? 'text-[#1db954] border-[#1db954]'
                 : 'text-slate-400 border-transparent hover:text-slate-200',
             )}
           >
             Saved Places
-            <span className="ml-2 text-xs text-slate-500">({savedPlaces.length})</span>
+            <span className="ml-1.5 text-xs text-slate-500">({savedPlaces.length})</span>
           </button>
         </div>
 
@@ -147,7 +147,7 @@ export default function ProfilePage() {
                     <Link
                       key={saved.id}
                       href={`/place/${place.id}`}
-                      className="block p-4 rounded-xl bg-[#1a1b23] border border-white/5 hover:border-white/10 hover:bg-[#252833] transition-colors"
+                      className="block p-4 rounded-xl bg-[#1a1b23] border border-white/5 hover:border-white/10 hover:bg-[#252833] transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-black/30"
                     >
                       {place.cover_image ? (
                         <div className="w-full h-28 rounded-lg overflow-hidden mb-3">
@@ -162,8 +162,8 @@ export default function ProfilePage() {
                       )}
                       <h3 className="font-semibold text-slate-100 truncate">{place.name}</h3>
                       <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3" />
-                        {place.city}, {place.country}
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{place.city}, {place.country}</span>
                       </p>
                       <span className="inline-flex items-center gap-1 mt-2 text-xs text-[#1db954]">
                         <Music className="w-3 h-3" />
