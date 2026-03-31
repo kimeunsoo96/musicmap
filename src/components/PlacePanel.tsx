@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import PinCard from './PinCard';
-import type { Pin, PlaceDetail } from '@/types';
+import type { Place, Pin, PlaceDetail } from '@/types';
 
 const AddPinModalLazy = dynamic(() => import('./AddPinModal'), { ssr: false });
 
@@ -16,9 +16,10 @@ interface AddPinButtonProps {
   placeId: string;
   placeName: string;
   onPinAdded: () => void;
+  place: Place | null;
 }
 
-function AddPinButton({ placeId, placeName, onPinAdded }: AddPinButtonProps) {
+function AddPinButton({ placeId, placeName, onPinAdded, place }: AddPinButtonProps) {
   const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -52,6 +53,7 @@ function AddPinButton({ placeId, placeName, onPinAdded }: AddPinButtonProps) {
           }}
           placeId={placeId}
           placeName={placeName}
+          place={place}
         />
       )}
     </>
@@ -191,6 +193,7 @@ export default function PlacePanel() {
               placeId={selectedPlace.id}
               placeName={selectedPlace.name}
               onPinAdded={refreshDetail}
+              place={selectedPlace}
             />
           </div>
         </>

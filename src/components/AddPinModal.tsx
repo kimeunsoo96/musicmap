@@ -12,11 +12,12 @@ interface AddPinModalProps {
   onClose: () => void;
   placeId: string;
   placeName: string;
+  place?: { lat: number; lng: number; city: string; country: string; google_place_id: string; name: string } | null;
 }
 
 const MAX_CAPTION = 140;
 
-export default function AddPinModal({ isOpen, onClose, placeId, placeName }: AddPinModalProps) {
+export default function AddPinModal({ isOpen, onClose, placeId, placeName, place }: AddPinModalProps) {
   const { user } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [trackQuery, setTrackQuery] = useState('');
@@ -71,10 +72,32 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName }: Add
     if (!selectedTrack || !user) return;
     setSubmitting(true);
     try {
+      let actualPlaceId = placeId;
+
+      // If this is a Nominatim place (not in DB yet), create it first
+      if (placeId.startsWith('nominatim-') && place) {
+        const createRes = await fetch('/api/places/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: place.name,
+            lat: place.lat,
+            lng: place.lng,
+            city: place.city,
+            country: place.country,
+            google_place_id: place.google_place_id,
+          }),
+        });
+        if (createRes.ok) {
+          const dbPlace = await createRes.json();
+          actualPlaceId = dbPlace.id;
+        }
+      }
+
       const res = await fetch('/api/pins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ placeId, track: selectedTrack, caption: caption.trim() }),
+        body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim() }),
       });
       if (res.ok) {
         onClose();

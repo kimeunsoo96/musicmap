@@ -88,6 +88,12 @@ export async function createPin(placeId: string, trackData: Track, caption: stri
     }).select('*, track:tracks(*)').single();
 
   if (error || !pin) throw new Error('Failed to create pin');
+
+  // Update pin_count manually (no trigger in DB yet)
+  const { count } = await supabase
+    .from('pins').select('*', { count: 'exact', head: true }).eq('place_id', placeId);
+  await supabase.from('places').update({ pin_count: count ?? 1 }).eq('id', placeId);
+
   return pin as Pin;
 }
 

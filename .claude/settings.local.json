@@ -24,7 +24,17 @@
       "Bash(curl -s \"https://api.spotify.com/v1/search?q=sunset+lover&type=track&limit=3\" -H \"Authorization: Bearer $TOKEN\")",
       "Bash(curl -s \"https://api.deezer.com/search?q=sunset+lover&limit=3\")",
       "Bash(curl -s \"https://syevltuyzjcwvdvkksmr.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZXZsdHV5empjd3Zkdmtrc21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzAyMTksImV4cCI6MjA5MDUwNjIxOX0.gFgjjZeFTiXd1DTHxdk685RWteEOzu5k8LB-xGh75bI\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(npm i:*)",
+      "Bash(vercel --yes --token)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel --yes -e NEXT_PUBLIC_SUPABASE_URL=https://syevltuyzjcwvdvkksmr.supabase.co -e NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZXZsdHV5empjd3Zkdmtrc21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzAyMTksImV4cCI6MjA5MDUwNjIxOX0.gFgjjZeFTiXd1DTHxdk685RWteEOzu5k8LB-xGh75bI -e NEXT_PUBLIC_USE_MOCK_DATA=false)",
+      "Bash(URL=\"https://syevltuyzjcwvdvkksmr.supabase.co\" ANON=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZXZsdHV5empjd3Zkdmtrc21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzAyMTksImV4cCI6MjA5MDUwNjIxOX0.gFgjjZeFTiXd1DTHxdk685RWteEOzu5k8LB-xGh75bI\" __NEW_LINE_b69274c2e8c2efe3__ curl -s \"$URL/rest/v1/tracks\" -H \"apikey: $ANON\" -H \"Authorization: Bearer $ANON\" -H \"Content-Type: application/json\" -H \"Prefer: return=representation\" -d '[:*)",
+      "Bash(URL=\"https://syevltuyzjcwvdvkksmr.supabase.co\")",
+      "Bash(ANON=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZXZsdHV5empjd3Zkdmtrc21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzAyMTksImV4cCI6MjA5MDUwNjIxOX0.gFgjjZeFTiXd1DTHxdk685RWteEOzu5k8LB-xGh75bI\")",
+      "Bash(__NEW_LINE_6cf0303c85744b98__ echo:*)"
     ]
   }
 }
