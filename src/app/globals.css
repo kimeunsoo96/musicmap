@@ -78,3 +78,240 @@ body {
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }
+
+/* ----------------------------------------------------------------
+   Map marker pulse animation (popular places with >= 3 pins)
+   ---------------------------------------------------------------- */
+.pin-pulse {
+  animation: pin-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pin-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(29, 185, 84, 0.4); }
+  50%       { box-shadow: 0 0 20px rgba(29, 185, 84, 0.7); }
+}
+
+/* ----------------------------------------------------------------
+   Leaflet tooltip — dark branded style
+   ---------------------------------------------------------------- */
+.custom-tooltip {
+  background: #1a1b23 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+  white-space: nowrap !important;
+}
+
+.custom-tooltip .leaflet-tooltip-tip {
+  display: none !important;
+}
+
+/* ----------------------------------------------------------------
+   Welcome overlay
+   ---------------------------------------------------------------- */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(10, 11, 15, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.welcome-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    rgba(29, 185, 84, 0.06) 0%,
+    rgba(139, 92, 246, 0.05) 50%,
+    transparent 100%
+  );
+  animation: welcome-bg-shift 6s ease-in-out infinite alternate;
+}
+
+@keyframes welcome-bg-shift {
+  0%   { opacity: 0.7; transform: scale(1);    }
+  100% { opacity: 1;   transform: scale(1.08); }
+}
+
+.welcome-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  padding: 2.5rem 2rem 2rem;
+  background: linear-gradient(160deg, #1a1b23 0%, #12131a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(29, 185, 84, 0.05);
+}
+
+/* Icon */
+.welcome-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-icon-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(29, 185, 84, 0.3);
+  animation: icon-ring-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes icon-ring-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1);    }
+  50%       { opacity: 1;   transform: scale(1.08); }
+}
+
+.welcome-icon-inner {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.15) 0%, rgba(139, 92, 246, 0.12) 100%);
+  border: 1px solid rgba(29, 185, 84, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.welcome-globe {
+  width: 28px;
+  height: 28px;
+  color: #1DB954;
+}
+
+.welcome-music {
+  position: absolute;
+  bottom: 10px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  color: #8b5cf6;
+}
+
+/* Text */
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #1DB954 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.35rem;
+  line-height: 1.1;
+}
+
+.welcome-tagline {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.welcome-description {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  max-width: 300px;
+  margin-bottom: 2rem;
+}
+
+/* CTA button */
+.welcome-cta {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  background: #1DB954;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 24px rgba(29, 185, 84, 0.25);
+  margin-bottom: 1rem;
+}
+
+.welcome-cta:hover {
+  background: #1ed760;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(29, 185, 84, 0.35);
+}
+
+.welcome-cta:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 16px rgba(29, 185, 84, 0.2);
+}
+
+.welcome-cta:focus-visible {
+  outline: 2px solid #1DB954;
+  outline-offset: 3px;
+}
+
+.welcome-footer {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+/* ----------------------------------------------------------------
+   Empty state animation (PlacePanel)
+   ---------------------------------------------------------------- */
+@keyframes music-float {
+  0%, 100% { transform: translateY(0);    opacity: 0.5; }
+  50%       { transform: translateY(-6px); opacity: 0.9; }
+}
+
+.empty-state-icon {
+  animation: music-float 2.5s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------------------
+   Smooth page transitions
+   ---------------------------------------------------------------- */
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+main {
+  animation: page-fade-in 0.35s ease both;
+}
+
+/* ----------------------------------------------------------------
+   Focus-visible accessibility styles
+   ---------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid rgba(29, 185, 84, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(29, 185, 84, 0.7);
+  outline-offset: 2px;
+}

@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({ places });
+    return NextResponse.json({ places }, {
+      headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200' },
+    });
   } catch {
     return NextResponse.json({ places: [] });
   }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Music, ChevronDown, User } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
+import type { Place } from '@/types';
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -15,6 +16,7 @@ interface HeaderProps {
 export default function Header({ children, hasSearch }: HeaderProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [stats, setStats] = useState<{ places: number; pins: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,11 +29,24 @@ export default function Header({ children, hasSearch }: HeaderProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Fetch total places + pins count for the header badge
+  useEffect(() => {
+    fetch('/api/places')
+      .then((res) => res.json())
+      .then((data: Place[]) => {
+        if (!Array.isArray(data)) return;
+        const places = data.length;
+        const pins = data.reduce((sum, p) => sum + (p.pin_count ?? 0), 0);
+        setStats({ places, pins });
+      })
+      .catch(() => {});
+  }, []);
+
   const showMobileSearch = hasSearch && children;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[10000] bg-surface/80 backdrop-blur-lg border-b border-white/5">
-      {/* Primary row: logo + [desktop search] + auth */}
+      {/* Primary row: logo + [desktop search] + stats + auth */}
       <div className="h-[52px] md:h-[60px] px-3 md:px-4 flex items-center gap-3">
         {/* Logo */}
         <div className="flex items-center gap-1.5 shrink-0">
@@ -48,6 +63,17 @@ export default function Header({ children, hasSearch }: HeaderProps) {
 
         {/* Spacer on mobile */}
         <div className="flex-1 md:hidden" />
+
+        {/* Stats badge — desktop only */}
+        {stats && (
+          <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-hover border border-white/5 text-xs text-slate-400 shrink-0 select-none">
+            <span>🌍</span>
+            <span className="text-slate-300 font-medium">{stats.places}</span>
+            <span className="mx-0.5 text-slate-600">·</span>
+            <span>🎵</span>
+            <span className="text-slate-300 font-medium">{stats.pins}</span>
+          </div>
+        )}
 
         {/* Auth */}
         <div className="shrink-0">

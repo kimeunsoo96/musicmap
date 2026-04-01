@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Bookmark, MapPin, Plus } from 'lucide-react';
+import { X, Bookmark, MapPin, Plus, Music } from 'lucide-react';
 import Link from 'next/link';
 import { useMapContext } from '@/contexts/map-context';
 import { useAuth } from '@/contexts/auth-context';
@@ -57,6 +57,27 @@ function AddPinButton({ placeId, placeName, onPinAdded, place }: AddPinButtonPro
         />
       )}
     </>
+  );
+}
+
+// ----------------------------------------------------------------
+// Empty state component
+// ----------------------------------------------------------------
+function EmptyPins({ placeName }: { placeName: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 px-4 text-center gap-3">
+      <div className="empty-state-icon w-14 h-14 rounded-full bg-surface-hover flex items-center justify-center">
+        <Music className="w-6 h-6 text-spotify/60" />
+      </div>
+      <div>
+        <p className="font-semibold text-slate-300 text-sm mb-1">
+          Be the first to share a song here
+        </p>
+        <p className="text-slate-500 text-sm leading-relaxed">
+          What song reminds you of {placeName}?
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -179,9 +200,7 @@ export default function PlacePanel() {
             {loadingDetail ? (
               <p className="text-sm text-slate-500 text-center py-8">Loading...</p>
             ) : pins.length === 0 ? (
-              <p className="text-sm text-slate-500 text-center py-8">
-                No pins yet. Be the first to add a song!
-              </p>
+              <EmptyPins placeName={selectedPlace.name} />
             ) : (
               pins.map((pin) => <PinCard key={pin.id} pin={pin} />)
             )}

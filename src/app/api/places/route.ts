@@ -22,9 +22,13 @@ export async function GET(request: NextRequest) {
 
     const bounds: MapBounds = { north, south, east, west };
     const places = await getPlaces(bounds);
-    return NextResponse.json(places);
+    return NextResponse.json(places, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+    });
   }
 
   const places = await getPlaces();
-  return NextResponse.json(places);
+  return NextResponse.json(places, {
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+  });
 }

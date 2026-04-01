@@ -32,7 +32,9 @@ export async function GET(request: NextRequest) {
       created_at: new Date().toISOString(),
     }));
 
-    return NextResponse.json({ tracks });
+    return NextResponse.json({ tracks }, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
+    });
   } catch {
     return NextResponse.json({ tracks: [] });
   }

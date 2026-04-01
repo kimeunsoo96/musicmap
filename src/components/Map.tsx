@@ -11,10 +11,11 @@ import type { Place } from '@/types';
 // Custom pin icon
 // ----------------------------------------------------------------
 const createPinIcon = (pinCount: number) => {
-  const size = Math.min(28, Math.max(14, 10 + pinCount * 2));
+  const size = Math.min(32, Math.max(14, 10 + pinCount * 2));
+  const pulseClass = pinCount >= 3 ? 'pin-pulse' : '';
   return L.divIcon({
     className: 'custom-pin',
-    html: `<div style="width:${size}px;height:${size}px;background:#1DB954;border-radius:50%;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 10px rgba(29,185,84,0.4);"></div>`,
+    html: `<div class="${pulseClass}" style="width:${size}px;height:${size}px;background:#1DB954;border-radius:50%;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 10px rgba(29,185,84,0.4);transition:transform 0.2s;cursor:pointer;"></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
@@ -96,6 +97,20 @@ export default function Map() {
             click: (e) => {
               L.DomEvent.stopPropagation(e);
               setTimeout(() => setSelectedPlace(place), 10);
+            },
+            mouseover: (e) => {
+              const marker = e.target;
+              marker.bindTooltip(
+                `<strong>${place.name}</strong><br/><span style="color:#1DB954">${place.pin_count} ${place.pin_count === 1 ? 'pin' : 'pins'}</span>`,
+                {
+                  className: 'custom-tooltip',
+                  direction: 'top',
+                  offset: [0, -10],
+                }
+              ).openTooltip();
+            },
+            mouseout: (e) => {
+              e.target.closeTooltip();
             },
           }}
         />

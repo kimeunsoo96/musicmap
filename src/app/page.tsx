@@ -1,9 +1,12 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import MapDynamic from '@/components/MapDynamic';
 import PlacePanel from '@/components/PlacePanel';
+
+const WelcomeOverlay = dynamic(() => import('@/components/WelcomeOverlay'), { ssr: false });
 
 export default function HomePage() {
   return (
@@ -15,6 +18,7 @@ export default function HomePage() {
         <MapDynamic />
         <PlacePanel />
       </main>
+      <WelcomeOverlay />
     </div>
   );
 }

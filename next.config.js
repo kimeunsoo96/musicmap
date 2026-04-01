@@ -9,6 +9,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'e-cdns-images.dzcdn.net' },
     ],
   },
+  poweredByHeader: false,
+  compress: true,
 };
 
 module.exports = nextConfig;
