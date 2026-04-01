@@ -80,10 +80,15 @@ export async function createPin(placeId: string, trackData: Track, caption: stri
 
   if (!track) throw new Error('Failed to create track');
 
+  // Get current user id if authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id ?? null;
+
   const { data: pin, error } = await supabase
     .from('pins').insert({
       place_id: placeId,
       track_id: track.id,
+      user_id: userId,
       caption,
     }).select('*, track:tracks(*)').single();
 

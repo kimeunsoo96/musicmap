@@ -18,7 +18,6 @@ export default function LoginPage() {
 
   function handleLoginWithGoogle() {
     auth.login();
-    router.push('/');
   }
 
   return (

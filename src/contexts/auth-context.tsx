@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from '@/types';
+import { supabase, isMockMode } from '@/lib/supabase';
 import { MOCK_USERS } from '@/lib/mock-data';
+import type { User } from '@/types';
 
 interface AuthContextValue {
   user: User | null;
@@ -14,34 +15,79 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = 'musicmap_user';
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setUser(JSON.parse(stored) as User);
-      }
-    } catch {
-      // ignore malformed storage
-    } finally {
+    if (isMockMode || !supabase) {
+      // Mock mode fallback
+      try {
+        const stored = localStorage.getItem('musicmap_user');
+        if (stored) setUser(JSON.parse(stored) as User);
+      } catch { /* ignore */ }
       setIsLoading(false);
+      return;
     }
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const u: User = {
+          id: session.user.id,
+          email: session.user.email ?? '',
+          display_name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+          avatar_url: session.user.user_metadata?.avatar_url ?? '',
+        };
+        setUser(u);
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const u: User = {
+          id: session.user.id,
+          email: session.user.email ?? '',
+          display_name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+          avatar_url: session.user.user_metadata?.avatar_url ?? '',
+        };
+        setUser(u);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   function login() {
-    const mockUser = MOCK_USERS[0];
-    setUser(mockUser);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
+    if (isMockMode || !supabase) {
+      const mockUser = MOCK_USERS[0];
+      setUser(mockUser);
+      localStorage.setItem('musicmap_user', JSON.stringify(mockUser));
+      return;
+    }
+
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: typeof window !== 'undefined'
+          ? `${window.location.origin}/`
+          : 'https://musicmap-ruby.vercel.app/',
+      },
+    });
   }
 
   function logout() {
-    setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    if (isMockMode || !supabase) {
+      setUser(null);
+      localStorage.removeItem('musicmap_user');
+      return;
+    }
+
+    supabase.auth.signOut().then(() => setUser(null));
   }
 
   return (
