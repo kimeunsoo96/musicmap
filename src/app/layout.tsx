@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/auth-context';
 import { MapProvider } from '@/contexts/map-context';
+import { AudioPlayerProvider } from '@/contexts/audio-player-context';
+import PlayerBar from '@/components/PlayerBar';
 
 export const metadata: Metadata = {
   title: 'MusicMap — Pin your music to the world',
@@ -41,7 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         <AuthProvider>
           <MapProvider>
-            {children}
+            <AudioPlayerProvider>
+              {children}
+              <PlayerBar />
+            </AudioPlayerProvider>
           </MapProvider>
         </AuthProvider>
       </body>

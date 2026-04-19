@@ -64,7 +64,7 @@ export default function PinCard({ pin }: PinCardProps) {
       </div>
 
       {/* Audio preview */}
-      <AudioPreview previewUrl={track?.preview_url ?? null} />
+      <AudioPreview pin={pin} />
 
       {/* Like button */}
       <div className="shrink-0 flex flex-col items-center gap-0.5">

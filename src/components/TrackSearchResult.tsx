@@ -5,7 +5,7 @@ import { Music } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import type { Track } from '@/types';
-import AudioPreview from './AudioPreview';
+import TrackPreviewButton from './TrackPreviewButton';
 
 interface TrackSearchResultProps {
   track: Track;
@@ -57,7 +57,7 @@ export default function TrackSearchResult({ track, onSelect, isSelected }: Track
       </button>
 
       {/* Audio preview */}
-      <AudioPreview previewUrl={track.preview_url ?? null} />
+      <TrackPreviewButton previewUrl={track.preview_url ?? null} />
     </div>
   );
 }

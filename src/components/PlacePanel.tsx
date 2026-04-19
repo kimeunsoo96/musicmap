@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Bookmark, MapPin, Plus, Music } from 'lucide-react';
+import { X, Bookmark, MapPin, Plus, Music, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useMapContext } from '@/contexts/map-context';
 import { useAuth } from '@/contexts/auth-context';
+import { useAudioPlayer } from '@/contexts/audio-player-context';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import PinCard from './PinCard';
@@ -83,6 +84,7 @@ function EmptyPins({ placeName }: { placeName: string }) {
 
 export default function PlacePanel() {
   const { selectedPlace, isPanelOpen, closePanel } = useMapContext();
+  const { playPlace } = useAudioPlayer();
   const [detail, setDetail] = useState<PlaceDetail | null>(null);
   const [saved, setSaved] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -176,10 +178,19 @@ export default function PlacePanel() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3 mt-3">
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-spotify/10 text-spotify text-xs font-semibold">
                 {detail?.pin_count ?? selectedPlace.pin_count} {(detail?.pin_count ?? selectedPlace.pin_count) === 1 ? 'pin' : 'pins'}
               </span>
+              {pins.some((p) => p.track?.preview_url) && (
+                <button
+                  onClick={() => playPlace(selectedPlace.name, pins)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-spotify hover:bg-spotify-dark text-black text-xs font-bold transition-colors"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  Play this place
+                </button>
+              )}
               <button
                 onClick={handleSave}
                 className={cn(
@@ -190,7 +201,7 @@ export default function PlacePanel() {
                 )}
               >
                 <Bookmark className={cn('w-3.5 h-3.5', saved && 'fill-current')} />
-                {saved ? 'Saved' : 'Save Place'}
+                {saved ? 'Saved' : 'Save'}
               </button>
             </div>
           </div>
