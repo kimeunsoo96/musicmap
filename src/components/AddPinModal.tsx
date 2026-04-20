@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Search, Music } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
-import type { Track } from '@/types';
+import type { Track, Mood } from '@/types';
+import { MOODS } from '@/types';
 import TrackSearchResult from './TrackSearchResult';
 
 interface AddPinModalProps {
@@ -24,6 +25,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
   const [trackResults, setTrackResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [caption, setCaption] = useState('');
+  const [mood, setMood] = useState<Mood | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -35,6 +37,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
       setTrackResults([]);
       setSelectedTrack(null);
       setCaption('');
+      setMood(null);
     }
   }, [isOpen]);
 
@@ -97,7 +100,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
       const res = await fetch('/api/pins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim() }),
+        body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim(), mood }),
       });
       if (res.ok) {
         onClose();
@@ -216,6 +219,31 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-100 truncate">{selectedTrack.title}</p>
                 <p className="text-xs text-slate-400 truncate">{selectedTrack.artist}</p>
+              </div>
+            </div>
+
+            {/* Mood selector */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Vibe <span className="text-slate-600 normal-case">(optional)</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {MOODS.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setMood(mood === m.id ? null : m.id)}
+                    className={cn(
+                      'flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all',
+                      mood === m.id
+                        ? 'bg-white/10 border-white/30 text-white scale-105'
+                        : 'bg-surface border-white/10 text-slate-300 hover:border-white/20',
+                    )}
+                  >
+                    <span>{m.emoji}</span>
+                    {m.label}
+                  </button>
+                ))}
               </div>
             </div>
 

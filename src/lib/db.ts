@@ -5,7 +5,7 @@ import {
   toggleMockLike, toggleMockSave, isMockLiked, isMockSaved,
   MOCK_USERS,
 } from './mock-data';
-import type { Place, Track, Pin, PlaceDetail, MapBounds } from '@/types';
+import type { Place, Track, Pin, PlaceDetail, MapBounds, Mood } from '@/types';
 
 export async function getPlaces(bounds?: MapBounds): Promise<Place[]> {
   if (isMockMode || !supabase) return getMockPlaces(bounds);
@@ -55,9 +55,9 @@ export async function createOrGetPlace(placeData: {
   return data as Place;
 }
 
-export async function createPin(placeId: string, trackData: Track, caption: string): Promise<Pin> {
+export async function createPin(placeId: string, trackData: Track, caption: string, mood: Mood | null = null): Promise<Pin> {
   if (isMockMode || !supabase) {
-    return addMockPin(placeId, trackData.id, 'user-1', caption);
+    return addMockPin(placeId, trackData.id, 'user-1', caption, mood);
   }
 
   const { data: existingTrack } = await supabase
@@ -90,6 +90,7 @@ export async function createPin(placeId: string, trackData: Track, caption: stri
       track_id: track.id,
       user_id: userId,
       caption,
+      mood,
     }).select('*, track:tracks(*)').single();
 
   if (error || !pin) throw new Error('Failed to create pin');
@@ -144,6 +145,78 @@ export async function isSaved(placeId: string): Promise<boolean> {
   if (isMockMode || !supabase) return isMockSaved(placeId);
   const { data } = await supabase.from('saved_places').select('id').eq('place_id', placeId).is('user_id', null).single();
   return !!data;
+}
+
+export async function getPlacesByMood(mood: Mood, bounds?: MapBounds): Promise<Place[]> {
+  if (isMockMode || !supabase) {
+    const { getMockPlacesByMood } = await import('./mock-data');
+    return getMockPlacesByMood(mood, bounds);
+  }
+
+  // Find pins with this mood, collect unique place ids
+  const { data: pins } = await supabase
+    .from('pins')
+    .select('place_id')
+    .eq('mood', mood);
+
+  if (!pins || pins.length === 0) return [];
+
+  const placeIds = Array.from(new Set(pins.map((p) => p.place_id)));
+  let query = supabase.from('places').select('*').in('id', placeIds);
+  if (bounds) {
+    query = query
+      .gte('lat', bounds.south).lte('lat', bounds.north)
+      .gte('lng', bounds.west).lte('lng', bounds.east);
+  }
+  const { data: places } = await query;
+  return (places as Place[]) || [];
+}
+
+export async function getPinsInRegion(bounds: MapBounds): Promise<(Pin & { place: Place })[]> {
+  if (isMockMode || !supabase) {
+    const { getMockPinsInRegion } = await import('./mock-data');
+    return getMockPinsInRegion(bounds);
+  }
+
+  const { data: places } = await supabase
+    .from('places')
+    .select('id')
+    .gte('lat', bounds.south).lte('lat', bounds.north)
+    .gte('lng', bounds.west).lte('lng', bounds.east);
+
+  if (!places || places.length === 0) return [];
+
+  const { data: pins } = await supabase
+    .from('pins')
+    .select('*, track:tracks(*), place:places(*)')
+    .in('place_id', places.map((p) => p.id))
+    .order('likes_count', { ascending: false })
+    .limit(100);
+
+  return (pins as (Pin & { place: Place })[]) || [];
+}
+
+export interface TrackWithPlaces {
+  track: Track;
+  pins: (Pin & { place: Place })[];
+}
+
+export async function getTrackPlaces(trackId: string): Promise<TrackWithPlaces | null> {
+  if (isMockMode || !supabase) {
+    const { getMockTrackPlaces } = await import('./mock-data');
+    return getMockTrackPlaces(trackId);
+  }
+
+  const { data: track } = await supabase.from('tracks').select('*').eq('id', trackId).single();
+  if (!track) return null;
+
+  const { data: pins } = await supabase
+    .from('pins')
+    .select('*, place:places(*), track:tracks(*)')
+    .eq('track_id', trackId)
+    .order('likes_count', { ascending: false });
+
+  return { track: track as Track, pins: (pins as (Pin & { place: Place })[]) || [] };
 }
 
 // Re-export mock helpers for profile route (no auth yet)

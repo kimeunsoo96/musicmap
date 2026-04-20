@@ -42,9 +42,28 @@ function FlyToHandler() {
 // MapEvents - listens for moveend
 // ----------------------------------------------------------------
 function MapEvents() {
+  const { setVisibleBounds } = useMapContext();
+  const map = useMap();
+
+  useEffect(() => {
+    const b = map.getBounds();
+    setVisibleBounds({
+      north: b.getNorth(),
+      south: b.getSouth(),
+      east: b.getEast(),
+      west: b.getWest(),
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useMapEvents({
     moveend: () => {
-      // bounds-based fetching can be wired here in future
+      const b = map.getBounds();
+      setVisibleBounds({
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest(),
+      });
     },
   });
   return null;
@@ -54,15 +73,16 @@ function MapEvents() {
 // Main Map component
 // ----------------------------------------------------------------
 export default function Map() {
-  const { setSelectedPlace, selectedPlace } = useMapContext();
+  const { setSelectedPlace, selectedPlace, activeMood } = useMapContext();
   const [places, setPlaces] = useState<Place[]>([]);
 
   useEffect(() => {
-    fetch('/api/places')
+    const url = activeMood ? `/api/places?mood=${activeMood}` : '/api/places';
+    fetch(url)
       .then((res) => res.json())
       .then((data: Place[]) => setPlaces(Array.isArray(data) ? data : []))
       .catch(() => setPlaces([]));
-  }, []);
+  }, [activeMood]);
 
   // Add searched places that aren't already in the list
   useEffect(() => {

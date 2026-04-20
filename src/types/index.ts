@@ -30,12 +30,23 @@ export interface Track {
   created_at: string;
 }
 
+export type Mood = 'chill' | 'energy' | 'melancholy' | 'romantic' | 'nostalgic';
+
+export const MOODS: { id: Mood; label: string; emoji: string; color: string }[] = [
+  { id: 'chill',      label: 'Chill',      emoji: '🌿', color: '#10b981' },
+  { id: 'energy',     label: 'Energy',     emoji: '⚡', color: '#f59e0b' },
+  { id: 'melancholy', label: 'Melancholy', emoji: '🌧️', color: '#64748b' },
+  { id: 'romantic',   label: 'Romantic',   emoji: '🌹', color: '#ec4899' },
+  { id: 'nostalgic',  label: 'Nostalgic',  emoji: '📼', color: '#a78bfa' },
+];
+
 export interface Pin {
   id: string;
   place_id: string;
   track_id: string;
   user_id: string;
   caption: string;
+  mood?: Mood | null;
   likes_count: number;
   created_at: string;
   track?: Track;

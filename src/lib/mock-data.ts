@@ -639,6 +639,7 @@ export function addMockPin(
   trackId: string,
   userId: string,
   caption: string,
+  mood: Pin['mood'] = null,
 ): Pin {
   const newPin: Pin = {
     id: `pin-${Date.now()}`,
@@ -646,6 +647,7 @@ export function addMockPin(
     track_id: trackId,
     user_id: userId,
     caption,
+    mood,
     likes_count: 0,
     created_at: new Date().toISOString(),
   };
@@ -691,4 +693,46 @@ export function isMockLiked(pinId: string): boolean {
 
 export function isMockSaved(placeId: string): boolean {
   return MOCK_SAVED_PLACES.has(placeId);
+}
+
+export function getMockPlacesByMood(mood: NonNullable<Pin['mood']>, bounds?: MapBounds): Place[] {
+  const placeIdsWithMood = new Set(
+    MOCK_PINS.filter((p) => p.mood === mood).map((p) => p.place_id),
+  );
+  let places = MOCK_PLACES.filter((p) => placeIdsWithMood.has(p.id));
+  if (bounds) {
+    places = places.filter(
+      (p) =>
+        p.lat <= bounds.north &&
+        p.lat >= bounds.south &&
+        p.lng <= bounds.east &&
+        p.lng >= bounds.west,
+    );
+  }
+  return places;
+}
+
+export function getMockPinsInRegion(bounds: MapBounds) {
+  const placesInRegion = MOCK_PLACES.filter(
+    (p) =>
+      p.lat <= bounds.north &&
+      p.lat >= bounds.south &&
+      p.lng <= bounds.east &&
+      p.lng >= bounds.west,
+  );
+  const placeIds = new Set(placesInRegion.map((p) => p.id));
+  return MOCK_PINS
+    .filter((pin) => placeIds.has(pin.place_id))
+    .map((p) => ({ ...enrichPin(p), place: getPlaceById(p.place_id)! }))
+    .filter((p) => p.place);
+}
+
+export function getMockTrackPlaces(trackId: string) {
+  const track = MOCK_TRACKS.find((t) => t.id === trackId);
+  if (!track) return null;
+  const pins = MOCK_PINS
+    .filter((p) => p.track_id === trackId)
+    .map((p) => ({ ...enrichPin(p), place: getPlaceById(p.place_id)! }))
+    .filter((p) => p.place);
+  return { track, pins };
 }

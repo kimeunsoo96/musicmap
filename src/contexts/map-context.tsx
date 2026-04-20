@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
-import type { Place } from '@/types';
+import type { Place, MapBounds, Mood } from '@/types';
 
 interface MapCenter {
   lat: number;
@@ -18,6 +18,10 @@ interface MapContextValue {
   setMapCenter: (center: MapCenter) => void;
   mapZoom: number;
   setMapZoom: (zoom: number) => void;
+  visibleBounds: MapBounds | null;
+  setVisibleBounds: (bounds: MapBounds | null) => void;
+  activeMood: Mood | null;
+  setActiveMood: (mood: Mood | null) => void;
 }
 
 const MapContext = createContext<MapContextValue | null>(null);
@@ -30,6 +34,8 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState<MapCenter>(DEFAULT_CENTER);
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+  const [visibleBounds, setVisibleBounds] = useState<MapBounds | null>(null);
+  const [activeMood, setActiveMood] = useState<Mood | null>(null);
 
   function setSelectedPlace(place: Place | null) {
     setSelectedPlaceState(place);
@@ -60,6 +66,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setMapCenter,
         mapZoom,
         setMapZoom,
+        visibleBounds,
+        setVisibleBounds,
+        activeMood,
+        setActiveMood,
       }}
     >
       {children}
