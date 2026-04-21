@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { MapPin, Music, Bookmark, ArrowLeft } from 'lucide-react';
-import { getMockPlaceDetail, isMockSaved, toggleMockSave } from '@/lib/mock-data';
 import PinCard from '@/components/PinCard';
 import type { PlaceDetail } from '@/types';
 import { cn } from '@/lib/utils';
@@ -16,20 +15,26 @@ export default function PlaceDetailPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const result = getMockPlaceDetail(id);
-    setDetail(result);
-    if (result) {
-      setSaved(isMockSaved(result.id));
-    }
+    if (!id) return;
+    fetch(`/api/places/${id}`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: PlaceDetail | null) => setDetail(data))
+      .catch(() => setDetail(null));
   }, [id]);
 
-  function handleSave() {
+  async function handleSave() {
     if (!detail) return;
-    const result = toggleMockSave(detail.id);
-    setSaved(result.saved);
+    try {
+      const res = await fetch(`/api/places/${detail.id}/save`, { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        setSaved(result.saved);
+      }
+    } catch {
+      // ignore
+    }
   }
 
-  // Loading state
   if (detail === undefined) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
@@ -38,7 +43,6 @@ export default function PlaceDetailPage() {
     );
   }
 
-  // Not found
   if (detail === null) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-4 text-slate-300">
@@ -59,7 +63,6 @@ export default function PlaceDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-slate-100">
-      {/* Top bar */}
       <div className="sticky top-0 z-10 bg-[#0f1117]/90 backdrop-blur-lg border-b border-white/5 px-4 py-3">
         <Link
           href="/"
@@ -71,7 +74,6 @@ export default function PlaceDetailPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
-        {/* Cover image / hero */}
         <div className="relative w-full h-40 md:h-52 rounded-2xl overflow-hidden mb-6">
           {detail.cover_image ? (
             <img
@@ -85,7 +87,6 @@ export default function PlaceDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f1117]/80 to-transparent" />
         </div>
 
-        {/* Place header */}
         <div className="flex items-start justify-between gap-3 mb-6">
           <div className="min-w-0">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-100 mb-1 leading-tight">{detail.name}</h1>
@@ -101,7 +102,6 @@ export default function PlaceDetailPage() {
             </div>
           </div>
 
-          {/* Save button */}
           <button
             onClick={handleSave}
             className={cn(
@@ -116,7 +116,6 @@ export default function PlaceDetailPage() {
           </button>
         </div>
 
-        {/* Pins list */}
         <section>
           <h2 className="text-base md:text-lg font-semibold text-slate-200 mb-4">Songs pinned here</h2>
           {pins.length === 0 ? (

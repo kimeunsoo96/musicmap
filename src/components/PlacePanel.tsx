@@ -103,12 +103,17 @@ export default function PlacePanel() {
     }
 
     setLoadingDetail(true);
-    fetch(`/api/places/${selectedPlace.id}`, { cache: 'no-store' })
+    console.log(`[panel] fetching detail for ${selectedPlace.id} (refreshKey=${refreshKey})`);
+    fetch(`/api/places/${selectedPlace.id}?t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data: PlaceDetail | null) => {
+        console.log('[panel] detail received:', data);
         setDetail(data);
       })
-      .catch(() => setDetail(null))
+      .catch((e) => {
+        console.error('[panel] fetch failed:', e);
+        setDetail(null);
+      })
       .finally(() => setLoadingDetail(false));
   }, [selectedPlace?.id, refreshKey]);
 
