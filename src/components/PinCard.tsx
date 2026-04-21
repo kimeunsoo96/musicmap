@@ -43,7 +43,14 @@ export default function PinCard({ pin, onDelete }: PinCardProps) {
     setDeleting(true);
     try {
       const res = await fetch(`/api/pins/${pin.id}?userId=${user.id}`, { method: 'DELETE' });
-      if (res.ok) onDelete?.();
+      if (res.ok) {
+        onDelete?.();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(`Delete failed: ${err?.error ?? res.status}`);
+      }
+    } catch (e) {
+      alert('Delete failed: network error');
     } finally {
       setDeleting(false);
     }
