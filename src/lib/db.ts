@@ -154,13 +154,16 @@ export async function deletePin(pinId: string, userId: string): Promise<void> {
     return;
   }
   // Check ownership first
-  const { data: pin } = await supabase
-    .from('pins').select('id, user_id, place_id').eq('id', pinId).single();
-  if (!pin) throw new Error('Pin not found');
-  if (pin.user_id !== userId) throw new Error('Not authorized to delete this pin');
+  const { data: pin, error: selectError } = await supabase
+    .from('pins').select('id, user_id, place_id').eq('id', pinId).maybeSingle();
+  if (selectError) throw new Error(`Select failed: ${selectError.message}`);
+  if (!pin) throw new Error(`Pin not found (id=${pinId})`);
+  if (pin.user_id !== userId) {
+    throw new Error(`Not authorized: pin owner=${pin.user_id} vs requester=${userId}`);
+  }
 
-  const { error } = await supabase.from('pins').delete().eq('id', pinId);
-  if (error) throw new Error(error.message);
+  const { error: deleteError } = await supabase.from('pins').delete().eq('id', pinId);
+  if (deleteError) throw new Error(`Delete failed: ${deleteError.message}`);
 
   // Decrement pin_count manually
   const { count } = await supabase
