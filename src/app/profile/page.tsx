@@ -123,7 +123,10 @@ export default function ProfilePage() {
                         {pin.place.name}
                       </Link>
                     )}
-                    <PinCard pin={pin} />
+                    <PinCard
+                      pin={pin}
+                      onDelete={() => setUserPins((prev) => prev.filter((p) => p.id !== pin.id))}
+                    />
                   </div>
                 ))}
               </div>
