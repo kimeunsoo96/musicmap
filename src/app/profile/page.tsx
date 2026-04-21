@@ -26,7 +26,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/users/${user.id}/pins`)
+    fetch(`/api/users/${user.id}/pins`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { pins: [] }))
       .then((d) => setUserPins(d.pins ?? []))
       .catch(() => setUserPins([]));
