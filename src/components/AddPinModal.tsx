@@ -21,7 +21,7 @@ const MAX_CAPTION = 140;
 
 export default function AddPinModal({ isOpen, onClose, placeId, placeName, place }: AddPinModalProps) {
   const { user } = useAuth();
-  const { setSelectedPlace } = useMapContext();
+  const { setSelectedPlace, bumpPlacesVersion } = useMapContext();
   const [step, setStep] = useState<1 | 2>(1);
   const [trackQuery, setTrackQuery] = useState('');
   const [trackResults, setTrackResults] = useState<Track[]>([]);
@@ -114,6 +114,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
         // Swap the nominatim selection for the real DB place AFTER the pin
         // is persisted, so the panel's refetch finds it.
         if (dbPlace) setSelectedPlace(dbPlace);
+        bumpPlacesVersion();
         onClose();
       } else {
         const err = await res.json().catch(() => ({}));

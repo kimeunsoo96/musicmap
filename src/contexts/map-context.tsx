@@ -22,6 +22,8 @@ interface MapContextValue {
   setVisibleBounds: (bounds: MapBounds | null) => void;
   activeMood: Mood | null;
   setActiveMood: (mood: Mood | null) => void;
+  placesVersion: number;
+  bumpPlacesVersion: () => void;
 }
 
 const MapContext = createContext<MapContextValue | null>(null);
@@ -36,6 +38,8 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
   const [visibleBounds, setVisibleBounds] = useState<MapBounds | null>(null);
   const [activeMood, setActiveMood] = useState<Mood | null>(null);
+  const [placesVersion, setPlacesVersion] = useState(0);
+  const bumpPlacesVersion = () => setPlacesVersion((v) => v + 1);
 
   function setSelectedPlace(place: Place | null) {
     setSelectedPlaceState(place);
@@ -70,6 +74,8 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setVisibleBounds,
         activeMood,
         setActiveMood,
+        placesVersion,
+        bumpPlacesVersion,
       }}
     >
       {children}

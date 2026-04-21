@@ -85,16 +85,16 @@ function MapEvents() {
 // Main Map component
 // ----------------------------------------------------------------
 export default function Map() {
-  const { setSelectedPlace, selectedPlace, activeMood } = useMapContext();
+  const { setSelectedPlace, selectedPlace, activeMood, placesVersion } = useMapContext();
   const [places, setPlaces] = useState<Place[]>([]);
 
   useEffect(() => {
     const url = activeMood ? `/api/places?mood=${activeMood}` : '/api/places';
-    fetch(url)
+    fetch(url, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: Place[]) => setPlaces(Array.isArray(data) ? data : []))
       .catch(() => setPlaces([]));
-  }, [activeMood]);
+  }, [activeMood, placesVersion]);
 
   // Add searched/clicked places that aren't already in the list,
   // and drop any transient nominatim markers when deselected without pinning
