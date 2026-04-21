@@ -26,9 +26,12 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/users/${user.id}/pins`, { cache: 'no-store' })
+    fetch(`/api/users/${user.id}/pins?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { pins: [] }))
-      .then((d) => setUserPins(d.pins ?? []))
+      .then((d) => {
+        console.log('[profile] pins received:', d.pins);
+        setUserPins(d.pins ?? []);
+      })
       .catch(() => setUserPins([]));
     setSavedPlaces([]);
   }, [user]);
