@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -41,7 +41,7 @@ function FlyToHandler() {
 // ----------------------------------------------------------------
 // MapEvents - listens for moveend
 // ----------------------------------------------------------------
-function MapEvents() {
+function MapEvents({ markerClickRef }: { markerClickRef: React.MutableRefObject<number> }) {
   const { setVisibleBounds, setSelectedPlace } = useMapContext();
   const map = useMap();
 
@@ -66,6 +66,8 @@ function MapEvents() {
       });
     },
     click: async (e) => {
+      // Skip if a marker was just clicked (Leaflet bubbles marker clicks up to the map)
+      if (Date.now() - markerClickRef.current < 300) return;
       const { lat, lng } = e.latlng;
       try {
         const res = await fetch(`/api/places/reverse?lat=${lat}&lng=${lng}`);
@@ -87,6 +89,7 @@ function MapEvents() {
 export default function Map() {
   const { setSelectedPlace, selectedPlace, activeMood, placesVersion } = useMapContext();
   const [places, setPlaces] = useState<Place[]>([]);
+  const markerClickRef = useRef<number>(0);
 
   useEffect(() => {
     const url = activeMood ? `/api/places?mood=${activeMood}` : '/api/places';
@@ -122,7 +125,7 @@ export default function Map() {
       />
 
       <FlyToHandler />
-      <MapEvents />
+      <MapEvents markerClickRef={markerClickRef} />
 
       {places.map((place) => (
         <Marker
@@ -132,7 +135,8 @@ export default function Map() {
           eventHandlers={{
             click: (e) => {
               L.DomEvent.stopPropagation(e);
-              setTimeout(() => setSelectedPlace(place), 10);
+              markerClickRef.current = Date.now();
+              setSelectedPlace(place);
             },
             mouseover: (e) => {
               const marker = e.target;
