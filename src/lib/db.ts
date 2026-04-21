@@ -149,6 +149,25 @@ export async function isSaved(placeId: string): Promise<boolean> {
   return !!data;
 }
 
+export async function deletePin(pinId: string, userId: string): Promise<void> {
+  if (isMockMode || !supabase) {
+    return;
+  }
+  // Check ownership first
+  const { data: pin } = await supabase
+    .from('pins').select('id, user_id, place_id').eq('id', pinId).single();
+  if (!pin) throw new Error('Pin not found');
+  if (pin.user_id !== userId) throw new Error('Not authorized to delete this pin');
+
+  const { error } = await supabase.from('pins').delete().eq('id', pinId);
+  if (error) throw new Error(error.message);
+
+  // Decrement pin_count manually
+  const { count } = await supabase
+    .from('pins').select('*', { count: 'exact', head: true }).eq('place_id', pin.place_id);
+  await supabase.from('places').update({ pin_count: count ?? 0 }).eq('id', pin.place_id);
+}
+
 export async function getUserPins(userId: string): Promise<Pin[]> {
   if (isMockMode || !supabase) {
     const { getMockUserPins } = await import('./mock-data');

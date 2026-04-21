@@ -1,22 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, Music, Globe2 } from 'lucide-react';
+import { Heart, Music, Globe2, Trash2 } from 'lucide-react';
 import { cn, timeAgo } from '@/lib/utils';
 import type { Pin } from '@/types';
 import AudioPreview from './AudioPreview';
+import { useAuth } from '@/contexts/auth-context';
 import dynamic from 'next/dynamic';
 
 const TrackPlacesModalLazy = dynamic(() => import('./TrackPlacesModal'), { ssr: false });
 
 interface PinCardProps {
   pin: Pin;
+  onDelete?: () => void;
 }
 
-export default function PinCard({ pin }: PinCardProps) {
+export default function PinCard({ pin, onDelete }: PinCardProps) {
+  const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(pin.likes_count);
   const [showPlaces, setShowPlaces] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isOwnPin = user?.id && pin.user_id === user.id;
 
   async function handleLike() {
     try {
@@ -31,8 +37,20 @@ export default function PinCard({ pin }: PinCardProps) {
     }
   }
 
+  async function handleDelete() {
+    if (!user) return;
+    if (!confirm('Delete this pin?')) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/pins/${pin.id}?userId=${user.id}`, { method: 'DELETE' });
+      if (res.ok) onDelete?.();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const track = pin.track;
-  const user = pin.user;
+  const user_ = pin.user;
 
   return (
     <>
@@ -52,7 +70,6 @@ export default function PinCard({ pin }: PinCardProps) {
           ) : (
             <Music className="w-5 h-5 text-slate-500" />
           )}
-          {/* Hover overlay hinting globe */}
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/art:opacity-100 transition-opacity flex items-center justify-center">
             <Globe2 className="w-5 h-5 text-white" />
           </div>
@@ -72,14 +89,14 @@ export default function PinCard({ pin }: PinCardProps) {
             </p>
           )}
           <p className="text-xs text-slate-500 mt-1">
-            pinned by {user?.display_name ?? 'someone'} &middot; {timeAgo(pin.created_at)}
+            pinned by {user_?.display_name ?? 'someone'} &middot; {timeAgo(pin.created_at)}
           </p>
         </div>
 
         {/* Audio preview */}
         <AudioPreview pin={pin} />
 
-        {/* Like button */}
+        {/* Actions */}
         <div className="shrink-0 flex flex-col items-center gap-0.5">
           <button
             onClick={handleLike}
@@ -94,6 +111,17 @@ export default function PinCard({ pin }: PinCardProps) {
             <Heart className={cn('w-4 h-4', liked && 'fill-current')} />
           </button>
           <span className="text-xs text-slate-500">{likesCount}</span>
+          {isOwnPin && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="p-1.5 rounded-full text-slate-600 hover:text-red-400 hover:scale-110 transition-all mt-1 disabled:opacity-50"
+              aria-label="Delete pin"
+              title="Delete"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

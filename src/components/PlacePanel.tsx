@@ -88,6 +88,7 @@ export default function PlacePanel() {
   const [detail, setDetail] = useState<PlaceDetail | null>(null);
   const [saved, setSaved] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Load place detail whenever selectedPlace changes
   useEffect(() => {
@@ -96,28 +97,23 @@ export default function PlacePanel() {
       setSaved(false);
       return;
     }
-    // Nominatim-only places don't exist in DB yet
     if (selectedPlace.id.startsWith('nominatim-')) {
       setDetail({ ...selectedPlace, pins: [] });
       return;
     }
 
     setLoadingDetail(true);
-    fetch(`/api/places/${selectedPlace.id}`)
+    fetch(`/api/places/${selectedPlace.id}`, { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data: PlaceDetail | null) => {
         setDetail(data);
       })
       .catch(() => setDetail(null))
       .finally(() => setLoadingDetail(false));
-  }, [selectedPlace?.id]);
+  }, [selectedPlace?.id, refreshKey]);
 
   function refreshDetail() {
-    if (!selectedPlace) return;
-    fetch(`/api/places/${selectedPlace.id}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: PlaceDetail | null) => setDetail(data))
-      .catch(() => {});
+    setRefreshKey((k) => k + 1);
   }
 
   async function handleSave() {
@@ -218,7 +214,7 @@ export default function PlacePanel() {
             ) : pins.length === 0 ? (
               <EmptyPins placeName={selectedPlace.name} />
             ) : (
-              pins.map((pin) => <PinCard key={pin.id} pin={pin} />)
+              pins.map((pin) => <PinCard key={pin.id} pin={pin} onDelete={refreshDetail} />)
             )}
           </div>
 
