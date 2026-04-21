@@ -23,17 +23,28 @@ export async function GET(request: NextRequest) {
     }
 
     const item = await res.json();
+    if (item.error) {
+      return NextResponse.json({ error: item.error }, { status: 404 });
+    }
     const addr = item.address || {};
     const city =
       addr.city || addr.town || addr.village || addr.suburb || addr.neighbourhood || addr.county || '';
     const country = addr.country || '';
+    const displayFirst = item.display_name ? item.display_name.split(',')[0].trim() : '';
     const name =
       addr.attraction ||
       addr.tourism ||
+      addr.leisure ||
+      addr.amenity ||
+      addr.building ||
       addr.road ||
+      addr.pedestrian ||
+      addr.neighbourhood ||
       addr.suburb ||
+      displayFirst ||
       city ||
-      (item.display_name ? item.display_name.split(',')[0].trim() : 'Unknown place');
+      country ||
+      `${parseFloat(lat).toFixed(3)}, ${parseFloat(lng).toFixed(3)}`;
 
     const place: Place = {
       id: `nominatim-${item.place_id}`,
