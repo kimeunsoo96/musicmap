@@ -42,7 +42,7 @@ function FlyToHandler() {
 // MapEvents - listens for moveend
 // ----------------------------------------------------------------
 function MapEvents({ markerClickRef }: { markerClickRef: React.MutableRefObject<number> }) {
-  const { setVisibleBounds, setSelectedPlace } = useMapContext();
+  const { setVisibleBounds, setSelectedPlace, isPanelOpen, closePanel } = useMapContext();
   const map = useMap();
 
   useEffect(() => {
@@ -68,6 +68,11 @@ function MapEvents({ markerClickRef }: { markerClickRef: React.MutableRefObject<
     click: async (e) => {
       // Skip if a marker was just clicked (Leaflet bubbles marker clicks up to the map)
       if (Date.now() - markerClickRef.current < 300) return;
+      // If panel is already open, close it instead of creating another pin
+      if (isPanelOpen) {
+        closePanel();
+        return;
+      }
       const { lat, lng } = e.latlng;
       try {
         const res = await fetch(`/api/places/reverse?lat=${lat}&lng=${lng}`);

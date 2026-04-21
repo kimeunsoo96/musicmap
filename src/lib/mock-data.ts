@@ -712,7 +712,7 @@ export function getMockPlacesByMood(mood: NonNullable<Pin['mood']>, bounds?: Map
   return places;
 }
 
-export function getMockPinsInRegion(bounds: MapBounds) {
+export function getMockPinsInRegion(bounds: MapBounds, mood?: Pin['mood'] | null) {
   const placesInRegion = MOCK_PLACES.filter(
     (p) =>
       p.lat <= bounds.north &&
@@ -723,6 +723,7 @@ export function getMockPinsInRegion(bounds: MapBounds) {
   const placeIds = new Set(placesInRegion.map((p) => p.id));
   return MOCK_PINS
     .filter((pin) => placeIds.has(pin.place_id))
+    .filter((pin) => !mood || pin.mood === mood)
     .map((p) => ({ ...enrichPin(p), place: getPlaceById(p.place_id)! }))
     .filter((p) => p.place);
 }

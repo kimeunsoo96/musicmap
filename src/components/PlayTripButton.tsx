@@ -7,7 +7,7 @@ import { useAudioPlayer } from '@/contexts/audio-player-context';
 import type { Pin } from '@/types';
 
 export default function PlayTripButton() {
-  const { visibleBounds, isPanelOpen } = useMapContext();
+  const { visibleBounds, isPanelOpen, activeMood } = useMapContext();
   const { playPlace, currentPin } = useAudioPlayer();
   const [loading, setLoading] = useState(false);
 
@@ -19,8 +19,9 @@ export default function PlayTripButton() {
     setLoading(true);
     try {
       const p = visibleBounds;
+      const moodQuery = activeMood ? `&mood=${activeMood}` : '';
       const res = await fetch(
-        `/api/pins/in-region?north=${p.north}&south=${p.south}&east=${p.east}&west=${p.west}`,
+        `/api/pins/in-region?north=${p.north}&south=${p.south}&east=${p.east}&west=${p.west}${moodQuery}`,
       );
       const data: { pins: Pin[] } = await res.json();
       const withPreviews = (data.pins ?? []).filter((pin) => pin.track?.preview_url);

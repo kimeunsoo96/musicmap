@@ -213,10 +213,13 @@ export async function getPlacesByMood(mood: Mood, bounds?: MapBounds): Promise<P
   return (places as Place[]) || [];
 }
 
-export async function getPinsInRegion(bounds: MapBounds): Promise<(Pin & { place: Place })[]> {
+export async function getPinsInRegion(
+  bounds: MapBounds,
+  mood: Mood | null = null,
+): Promise<(Pin & { place: Place })[]> {
   if (isMockMode || !supabase) {
     const { getMockPinsInRegion } = await import('./mock-data');
-    return getMockPinsInRegion(bounds);
+    return getMockPinsInRegion(bounds, mood);
   }
 
   const { data: places } = await supabase
@@ -227,13 +230,15 @@ export async function getPinsInRegion(bounds: MapBounds): Promise<(Pin & { place
 
   if (!places || places.length === 0) return [];
 
-  const { data: pins } = await supabase
+  let query = supabase
     .from('pins')
     .select('*, track:tracks(*), place:places(*)')
     .in('place_id', places.map((p) => p.id))
     .order('likes_count', { ascending: false })
     .limit(100);
+  if (mood) query = query.eq('mood', mood);
 
+  const { data: pins } = await query;
   return (pins as (Pin & { place: Place })[]) || [];
 }
 
