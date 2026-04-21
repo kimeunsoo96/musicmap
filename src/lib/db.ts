@@ -10,7 +10,11 @@ import type { Place, Track, Pin, PlaceDetail, MapBounds, Mood } from '@/types';
 export async function getPlaces(bounds?: MapBounds): Promise<Place[]> {
   if (isMockMode || !supabase) return getMockPlaces(bounds);
 
-  let query = supabase.from('places').select('*').order('pin_count', { ascending: false });
+  let query = supabase
+    .from('places')
+    .select('*')
+    .gt('pin_count', 0)
+    .order('pin_count', { ascending: false });
 
   if (bounds) {
     query = query
