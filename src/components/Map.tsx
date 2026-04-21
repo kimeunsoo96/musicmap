@@ -96,10 +96,14 @@ export default function Map() {
       .catch(() => setPlaces([]));
   }, [activeMood]);
 
-  // Add searched places that aren't already in the list
+  // Add searched/clicked places that aren't already in the list,
+  // and drop any transient nominatim markers when deselected without pinning
   useEffect(() => {
     if (selectedPlace && !places.find((p) => p.id === selectedPlace.id)) {
       setPlaces((prev) => [...prev, selectedPlace]);
+    }
+    if (!selectedPlace) {
+      setPlaces((prev) => prev.filter((p) => !p.id.startsWith('nominatim-')));
     }
   }, [selectedPlace]); // eslint-disable-line react-hooks/exhaustive-deps
 

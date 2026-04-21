@@ -96,6 +96,11 @@ export default function PlacePanel() {
       setSaved(false);
       return;
     }
+    // Nominatim-only places don't exist in DB yet
+    if (selectedPlace.id.startsWith('nominatim-')) {
+      setDetail({ ...selectedPlace, pins: [] });
+      return;
+    }
 
     setLoadingDetail(true);
     fetch(`/api/places/${selectedPlace.id}`)

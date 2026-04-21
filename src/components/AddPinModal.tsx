@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Search, Music } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import { useMapContext } from '@/contexts/map-context';
 import { cn } from '@/lib/utils';
 import type { Track, Mood } from '@/types';
 import { MOODS } from '@/types';
@@ -20,6 +21,7 @@ const MAX_CAPTION = 140;
 
 export default function AddPinModal({ isOpen, onClose, placeId, placeName, place }: AddPinModalProps) {
   const { user } = useAuth();
+  const { setSelectedPlace } = useMapContext();
   const [step, setStep] = useState<1 | 2>(1);
   const [trackQuery, setTrackQuery] = useState('');
   const [trackResults, setTrackResults] = useState<Track[]>([]);
@@ -100,6 +102,8 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
         }
         const dbPlace = await createRes.json();
         actualPlaceId = dbPlace.id;
+        // Update the selected place in context to the real DB place
+        setSelectedPlace(dbPlace);
       }
 
       const res = await fetch('/api/pins', {
