@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(place);
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to create place' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Failed to create place';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

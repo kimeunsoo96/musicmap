@@ -51,7 +51,7 @@ export async function createOrGetPlace(placeData: {
 
   const { data, error } = await supabase
     .from('places').insert(placeData).select().single();
-  if (error || !data) throw new Error('Failed to create place');
+  if (error || !data) throw new Error(error?.message ?? 'Failed to create place');
   return data as Place;
 }
 
@@ -147,6 +147,19 @@ export async function isSaved(placeId: string): Promise<boolean> {
   if (isMockMode || !supabase) return isMockSaved(placeId);
   const { data } = await supabase.from('saved_places').select('id').eq('place_id', placeId).is('user_id', null).single();
   return !!data;
+}
+
+export async function getUserPins(userId: string): Promise<Pin[]> {
+  if (isMockMode || !supabase) {
+    const { getMockUserPins } = await import('./mock-data');
+    return getMockUserPins(userId);
+  }
+  const { data } = await supabase
+    .from('pins')
+    .select('*, track:tracks(*), place:places(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  return (data as Pin[]) || [];
 }
 
 export async function getPlacesByMood(mood: Mood, bounds?: MapBounds): Promise<Place[]> {

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Music, User } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
-import { getMockUserPins, getMockSavedPlaces } from '@/lib/mock-data';
 import PinCard from '@/components/PinCard';
 import type { Pin, SavedPlace } from '@/types';
 import { cn } from '@/lib/utils';
@@ -26,10 +25,12 @@ export default function ProfilePage() {
   }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (user) {
-      setUserPins(getMockUserPins(user.id));
-      setSavedPlaces(getMockSavedPlaces(user.id));
-    }
+    if (!user) return;
+    fetch(`/api/users/${user.id}/pins`)
+      .then((r) => (r.ok ? r.json() : { pins: [] }))
+      .then((d) => setUserPins(d.pins ?? []))
+      .catch(() => setUserPins([]));
+    setSavedPlaces([]);
   }, [user]);
 
   if (isLoading || !user) {

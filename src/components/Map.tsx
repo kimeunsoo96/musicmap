@@ -42,7 +42,7 @@ function FlyToHandler() {
 // MapEvents - listens for moveend
 // ----------------------------------------------------------------
 function MapEvents() {
-  const { setVisibleBounds } = useMapContext();
+  const { setVisibleBounds, setSelectedPlace } = useMapContext();
   const map = useMap();
 
   useEffect(() => {
@@ -64,6 +64,18 @@ function MapEvents() {
         east: b.getEast(),
         west: b.getWest(),
       });
+    },
+    click: async (e) => {
+      const { lat, lng } = e.latlng;
+      try {
+        const res = await fetch(`/api/places/reverse?lat=${lat}&lng=${lng}`);
+        if (res.ok) {
+          const place = await res.json();
+          setSelectedPlace(place);
+        }
+      } catch {
+        // ignore
+      }
     },
   });
   return null;
