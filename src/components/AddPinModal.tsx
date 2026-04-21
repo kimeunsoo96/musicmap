@@ -5,7 +5,7 @@ import { X, Search, Music } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { useMapContext } from '@/contexts/map-context';
 import { cn } from '@/lib/utils';
-import type { Track, Mood } from '@/types';
+import type { Track, Mood, Place } from '@/types';
 import { MOODS } from '@/types';
 import TrackSearchResult from './TrackSearchResult';
 
@@ -80,6 +80,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
     setErrorMsg(null);
     try {
       let actualPlaceId = placeId;
+      let dbPlace: Place | null = null;
 
       // If this is a Nominatim place (not in DB yet), create it first
       if (placeId.startsWith('nominatim-') && place) {
@@ -100,10 +101,8 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
           setErrorMsg(err?.error ?? 'Failed to create place');
           return;
         }
-        const dbPlace = await createRes.json();
+        dbPlace = (await createRes.json()) as Place;
         actualPlaceId = dbPlace.id;
-        // Update the selected place in context to the real DB place
-        setSelectedPlace(dbPlace);
       }
 
       const res = await fetch('/api/pins', {
@@ -112,6 +111,9 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
         body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim(), mood, userId: user.id }),
       });
       if (res.ok) {
+        // Swap the nominatim selection for the real DB place AFTER the pin
+        // is persisted, so the panel's refetch finds it.
+        if (dbPlace) setSelectedPlace(dbPlace);
         onClose();
       } else {
         const err = await res.json().catch(() => ({}));
