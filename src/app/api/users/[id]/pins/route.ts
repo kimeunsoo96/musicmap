@@ -10,9 +10,8 @@ export async function GET(
 ) {
   const { id } = await params;
   const pins = await getUserPins(id);
-  console.log(`[api/users/${id}/pins] returning ${pins.length} pins:`, pins.map((p) => p.id));
   return NextResponse.json(
-    { pins, _debug: { userId: id, count: pins.length, ts: Date.now() } },
+    { pins },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } },
   );
 }
