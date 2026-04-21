@@ -55,9 +55,15 @@ export async function createOrGetPlace(placeData: {
   return data as Place;
 }
 
-export async function createPin(placeId: string, trackData: Track, caption: string, mood: Mood | null = null): Promise<Pin> {
+export async function createPin(
+  placeId: string,
+  trackData: Track,
+  caption: string,
+  mood: Mood | null = null,
+  userId: string | null = null,
+): Promise<Pin> {
   if (isMockMode || !supabase) {
-    return addMockPin(placeId, trackData.id, 'user-1', caption, mood);
+    return addMockPin(placeId, trackData.id, userId ?? 'user-1', caption, mood);
   }
 
   const { data: existingTrack } = await supabase
@@ -80,10 +86,6 @@ export async function createPin(placeId: string, trackData: Track, caption: stri
 
   if (!track) throw new Error('Failed to create track');
 
-  // Get current user id if authenticated
-  const { data: { session } } = await supabase.auth.getSession();
-  const userId = session?.user?.id ?? null;
-
   const { data: pin, error } = await supabase
     .from('pins').insert({
       place_id: placeId,
@@ -93,7 +95,7 @@ export async function createPin(placeId: string, trackData: Track, caption: stri
       mood,
     }).select('*, track:tracks(*)').single();
 
-  if (error || !pin) throw new Error('Failed to create pin');
+  if (error || !pin) throw new Error(error?.message ?? 'Failed to create pin');
 
   // Update pin_count manually (no trigger in DB yet)
   const { count } = await supabase

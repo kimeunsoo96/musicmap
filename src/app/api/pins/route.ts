@@ -12,11 +12,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { placeId, track, caption, mood } = body as {
+  const { placeId, track, caption, mood, userId } = body as {
     placeId: string;
     track: Track;
     caption: string;
     mood?: Mood | null;
+    userId?: string | null;
   };
 
   if (!placeId || typeof placeId !== 'string') {
@@ -34,9 +35,10 @@ export async function POST(request: NextRequest) {
   const safeMood: Mood | null = mood && VALID_MOODS.includes(mood) ? mood : null;
 
   try {
-    const pin = await createPin(placeId, track, caption ?? '', safeMood);
+    const pin = await createPin(placeId, track, caption ?? '', safeMood, userId ?? null);
     return NextResponse.json(pin, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to create pin' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Failed to create pin';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

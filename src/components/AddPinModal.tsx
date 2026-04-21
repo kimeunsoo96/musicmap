@@ -27,6 +27,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
   const [caption, setCaption] = useState('');
   const [mood, setMood] = useState<Mood | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +75,7 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
   async function handleSubmit() {
     if (!selectedTrack || !user) return;
     setSubmitting(true);
+    setErrorMsg(null);
     try {
       let actualPlaceId = placeId;
 
@@ -91,22 +93,28 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
             google_place_id: place.google_place_id,
           }),
         });
-        if (createRes.ok) {
-          const dbPlace = await createRes.json();
-          actualPlaceId = dbPlace.id;
+        if (!createRes.ok) {
+          const err = await createRes.json().catch(() => ({}));
+          setErrorMsg(err?.error ?? 'Failed to create place');
+          return;
         }
+        const dbPlace = await createRes.json();
+        actualPlaceId = dbPlace.id;
       }
 
       const res = await fetch('/api/pins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim(), mood }),
+        body: JSON.stringify({ placeId: actualPlaceId, track: selectedTrack, caption: caption.trim(), mood, userId: user.id }),
       });
       if (res.ok) {
         onClose();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setErrorMsg(err?.error ?? `Failed (${res.status})`);
       }
-    } catch {
-      // ignore network errors
+    } catch (e) {
+      setErrorMsg('Network error');
     } finally {
       setSubmitting(false);
     }
@@ -270,6 +278,12 @@ export default function AddPinModal({ isOpen, onClose, placeId, placeName, place
                 {caption.length} / {MAX_CAPTION}
               </p>
             </div>
+
+            {errorMsg && (
+              <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2">
+                {errorMsg}
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-2 pt-1 pb-safe">
