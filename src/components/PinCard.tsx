@@ -25,8 +25,16 @@ export default function PinCard({ pin, onDelete }: PinCardProps) {
   const isOwnPin = user?.id && pin.user_id === user.id;
 
   async function handleLike() {
+    if (!user) {
+      alert('Sign in to like pins');
+      return;
+    }
     try {
-      const res = await fetch(`/api/pins/${pin.id}/like`, { method: 'POST' });
+      const res = await fetch(`/api/pins/${pin.id}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
       if (res.ok) {
         const result = await res.json();
         setLiked(result.liked);

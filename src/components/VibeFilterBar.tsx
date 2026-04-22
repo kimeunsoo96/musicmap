@@ -9,7 +9,7 @@ export default function VibeFilterBar() {
   const { activeMood, setActiveMood } = useMapContext();
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-[999] pointer-events-none">
+    <div className="fixed top-[56px] left-0 right-0 z-[9998] pointer-events-none">
       <div className="px-3 py-2 flex gap-1.5 overflow-x-auto pointer-events-auto md:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <button
           onClick={() => setActiveMood(null)}

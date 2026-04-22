@@ -109,20 +109,31 @@ export async function createPin(
   return pin as Pin;
 }
 
-export async function toggleLike(pinId: string): Promise<{ liked: boolean; likes_count: number }> {
+export async function toggleLike(
+  pinId: string,
+  userId: string | null,
+): Promise<{ liked: boolean; likes_count: number }> {
   if (isMockMode || !supabase) return toggleMockLike(pinId);
+  if (!userId) throw new Error('Sign in to like pins');
 
   const { data: existing } = await supabase
-    .from('pin_likes').select('id').eq('pin_id', pinId).is('user_id', null).single();
+    .from('pin_likes').select('id').eq('pin_id', pinId).eq('user_id', userId).maybeSingle();
 
   if (existing) {
     await supabase.from('pin_likes').delete().eq('id', existing.id);
-    const { data: pin } = await supabase.from('pins').select('likes_count').eq('id', pinId).single();
-    return { liked: false, likes_count: pin?.likes_count ?? 0 };
+    // Decrement manually so UI doesn't depend on the trigger firing
+    const { count } = await supabase
+      .from('pin_likes').select('*', { count: 'exact', head: true }).eq('pin_id', pinId);
+    await supabase.from('pins').update({ likes_count: count ?? 0 }).eq('id', pinId);
+    return { liked: false, likes_count: count ?? 0 };
   } else {
-    await supabase.from('pin_likes').insert({ pin_id: pinId });
-    const { data: pin } = await supabase.from('pins').select('likes_count').eq('id', pinId).single();
-    return { liked: true, likes_count: pin?.likes_count ?? 0 };
+    const { error: insertError } = await supabase
+      .from('pin_likes').insert({ pin_id: pinId, user_id: userId });
+    if (insertError) throw new Error(insertError.message);
+    const { count } = await supabase
+      .from('pin_likes').select('*', { count: 'exact', head: true }).eq('pin_id', pinId);
+    await supabase.from('pins').update({ likes_count: count ?? 1 }).eq('id', pinId);
+    return { liked: true, likes_count: count ?? 1 };
   }
 }
 
