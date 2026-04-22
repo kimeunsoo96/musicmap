@@ -207,37 +207,41 @@ async function seed() {
       const place = await upsertPlace(s);
       const dbTrack = await upsertTrack(track);
 
-      // If a seed pin already exists for this place+track, skip.
       const { data: existingPin } = await supabase
         .from('pins').select('id')
         .eq('place_id', place.id).eq('track_id', dbTrack.id)
         .is('user_id', null).maybeSingle();
-      if (existingPin) {
-        console.log(`  ~ skip ${s.name}: pin already exists`);
-        skip++;
-        continue;
+
+      let inserted = false;
+      if (!existingPin) {
+        const { error: pinErr } = await supabase.from('pins').insert({
+          place_id: place.id,
+          track_id: dbTrack.id,
+          user_id: null,
+          caption: s.caption,
+          mood: s.mood,
+        });
+        if (pinErr) {
+          console.log(`  ! ${s.name} pin failed: ${pinErr.message}`);
+          fail++;
+          continue;
+        }
+        inserted = true;
       }
 
-      const { error: pinErr } = await supabase.from('pins').insert({
-        place_id: place.id,
-        track_id: dbTrack.id,
-        user_id: null,
-        caption: s.caption,
-        mood: s.mood,
-      });
-      if (pinErr) {
-        console.log(`  ! ${s.name} pin failed: ${pinErr.message}`);
-        fail++;
-        continue;
-      }
-
-      // Update pin_count
+      // Always reconcile pin_count — guards against prior runs that
+      // created pins but left pin_count stale (hides the place on the map).
       const { count } = await supabase
         .from('pins').select('*', { count: 'exact', head: true }).eq('place_id', place.id);
-      await supabase.from('places').update({ pin_count: count ?? 1 }).eq('id', place.id);
+      await supabase.from('places').update({ pin_count: count ?? 0 }).eq('id', place.id);
 
-      console.log(`  ✓ ${s.name} (${s.city}) ← ${track.title} by ${track.artist}`);
-      ok++;
+      if (inserted) {
+        console.log(`  ✓ ${s.name} (${s.city}) ← ${track.title} by ${track.artist}`);
+        ok++;
+      } else {
+        console.log(`  ~ skip ${s.name}: pin already exists (count=${count})`);
+        skip++;
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.log(`  ! ${s.name} error: ${msg}`);
