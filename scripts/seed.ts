@@ -23,14 +23,20 @@ if (existsSync(envPath)) {
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY');
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.error(
+    'Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.\n' +
+    'The service-role key is required to bypass RLS for seed inserts.\n' +
+    'Find it in Supabase Dashboard → Settings → API → service_role key.',
+  );
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 type Mood = 'chill' | 'energy' | 'melancholy' | 'romantic' | 'nostalgic';
 
@@ -59,8 +65,8 @@ const SEEDS: Seed[] = [
   { name: 'Gangnam', city: 'Seoul', country: 'South Korea', lat: 37.4979, lng: 127.0276,
     query: 'Gangnam Style Psy', mood: 'energy', caption: 'Iconic.' },
   { name: 'Hallgrímskirkja', city: 'Reykjavík', country: 'Iceland', lat: 64.1418, lng: -21.9266,
-    query: 'Svefn-g-englar Sigur Rós', mood: 'melancholy',
-    caption: 'Cold air, warm cathedral, impossibly tender music.' },
+    query: 'Joga Bjork', mood: 'melancholy',
+    caption: 'Volcanic landscape, crystalline voice — pure Iceland.' },
   { name: 'Copacabana Beach', city: 'Rio de Janeiro', country: 'Brazil', lat: -22.9711, lng: -43.1822,
     query: 'Girl from Ipanema Astrud Gilberto', mood: 'chill',
     caption: 'The tide in time with the bossa.' },
